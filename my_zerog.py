@@ -6,12 +6,17 @@ Allows the user to loosen some joints while stiffen others.
 Based on "Baxter RSDK Joint Trajectory Action Server" and the other examples...
 
 
+If you want to see joint angles using rqt_plot, you can create new topics like these:
 rostopic echo /robot/joint_states/position[6] 2>/dev/null | rostopic pub left_w0 std_msgs/Float64 -r 150 >/dev/null&
 rostopic echo /robot/joint_states/position[2] 2>/dev/null | rostopic pub left_e0 std_msgs/Float64 -r 150 >/dev/null&
 2>/dev/null => redirects the stderr (the pipe receives only stdout)
 -r 150 => must be faster than the result of rostopic hz /robot/joint_states
 
+
+BE VERY VERY CAREFUL WITH THIS SCRIPT. IT USES TORQUE CONTROL (SAFETY DISABLED)
+AND ALSO QUITE HIGH GAINS (CRAZY ROBOT)! I WILL TAKE NO REPONSIBILITIES!!!
 '''
+
 import operator
 import subprocess
 from multiprocessing import Process
