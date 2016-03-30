@@ -11,9 +11,6 @@ rostopic echo /robot/joint_states/position[2] 2>/dev/null | rostopic pub left_e0
 2>/dev/null => redirects the stderr (the pipe receives only stdout)
 -r 150 => must be faster than the result of rostopic hz /robot/joint_states
 
-proc = subprocess.Popen(...)
-proc.send_signal(subprocess.signal.SIGINT)
-
 '''
 import operator
 import subprocess
@@ -30,8 +27,8 @@ from std_msgs.msg import (
 import baxter_control
 import baxter_interface
 
-# The gains are QUITE HIGH, so it's important to start at the initial position!
-starting_pos_example = dict(zip(['left_e0', 'left_e1', 'left_s0', 'left_s1', 'left_w0', 'left_w1', 'left_w2'],[0.0, 1.85, -0.54, -1.1, 0.0, 0.78, 0.64]))
+from baxter_interface import CHECK_VERSION
+
 
 stiff_joints_names = ['left_w0', 'left_e0'] #I will keep left_w2 loose, because the pen should be aligned with that axis anyway...
 joint_gains = [[30,21,.4],[60,42,1.2]]
@@ -41,7 +38,7 @@ PID_gains_example = dict(zip(stiff_joints_names,[dict(zip(['kp','ki','kd'],jg)) 
 
 class ZeroG(object):
     def __init__(self, limb_name='left', PID_gains=PID_gains_example, rate=1000.0,
-                 stiff_joints=stiff_joints_example, starting_positions=starting_pos_example):
+                 stiff_joints=stiff_joints_example):
 
         rospy.loginfo("Initializing node... ")
         rospy.init_node("ZeroG")
@@ -64,13 +61,32 @@ class ZeroG(object):
         self._enable = baxter_interface.RobotEnable()
         self._name = limb_name
         self._cuff = baxter_interface.DigitalIO('%s_lower_cuff' % (limb_name,))
+        self._dash = baxter_interface.DigitalIO('%s_upper_button' % (limb_name,))
+        self._circle = baxter_interface.DigitalIO('%s_lower_button' % (limb_name,))
         # DigitalIO('%s_upper_button' % (limb,))  # 'dash' btn
         # DigitalIO('%s_lower_button' % (limb,))   # 'circle' btn
         # DigitalIO('%s_lower_cuff' % (limb,))    # cuff squeeze
-        self._cuff.state_changed.connect(self._cuff_cb) #callback for buttons
-                                                        #it pass the buttons state to _cuff_cb
+        self._cuff.state_changed.connect(self._cuff_cb) #callback for cuff sensor
+                                                        #it pass the cuff sensor state to _cuff_cb
+
+        self._dash.state_changed.connect(self._dash_cb) #callback for dash button
+                                                        #it pass the dash button state to _dash_cb
+
+        self._circle.state_changed.connect(self._circle_cb) #callback for circle button
+                                                            #it pass the circle button state to _circle_cb
 
         self._cuff_state = False
+        self._dash_state = False
+        self._circle_state = False
+
+        self._gripper = baxter_interface.Gripper('%s' % (limb_name,), CHECK_VERSION)
+
+        # Verify Grippers Have No Errors and are Calibrated
+        if self._gripper.error():
+            self._gripper.reset()
+        if (not self._gripper.calibrated() and
+            self._gripper.type() != 'custom'):
+            self._gripper.calibrate()
 
         # Controller parameters
         self._control_rate = rate  # Hz
@@ -90,9 +106,6 @@ class ZeroG(object):
         print "Initialization completed!"
 
         rospy.on_shutdown(self.clean_shutdown)
-
-        print "Moving to starting position!"
-        self._limb.move_to_joint_positions(starting_positions, timeout=15.0, threshold=0.008726646)
 
     def _disable_cuff(self):
         cmd="rostopic pub -r 10 /robot/limb/left/suppress_cuff_interaction std_msgs/Empty"
@@ -154,10 +167,20 @@ class ZeroG(object):
         if hasattr(self, 'disable_orig_zerog'):
             self.disable_orig_zerog.kill()
 
-
     def _cuff_cb(self, value):
         self._cuff_state = value
-        print "Cuff state:",value
+
+    def _dash_cb(self, value):
+        self._dash_state = value
+
+    def _circle_cb(self, value):
+        if value:
+            if self._circle_state:
+                self._gripper.open()
+                self._circle_state=False
+            else:
+                self._gripper.close()
+                self._circle_state=True
 
     def _get_current_position(self, joint_names):
         return [self._limb.joint_angle(joint) for joint in joint_names]
@@ -167,11 +190,32 @@ class ZeroG(object):
         error = map(operator.sub, set_point, current)
         return dict(zip(joint_names, error))
 
+    def initial_position(self):
+        print "Hold Baxter's cuff sensors to SET THE INITIAL POSITION."
+        print "Press the dash button when finished."
+        # Waits until ctrl+c or someone holds the cuff
+        while not rospy.is_shutdown():
+            if not self.robot_is_enabled():
+                return False
+            if self._dash_state:
+                break
+            rospy.sleep(.1)
+
+        starting_positions=dict(zip(self._joint_names,self._get_current_position(self._joint_names)))
+
+        for key, value in self._stiff_joints.iteritems():
+            starting_positions[key]=value
+
+        print "Moving to starting joint positions!"
+        self._limb.move_to_joint_positions(starting_positions, timeout=15.0, threshold=0.008726646)
+        return True
+
 if __name__ == '__main__':
     zo = ZeroG()
 
-    # Launches a second process to disable the original zero-g:
-    zo.disable_orig_zerog = zo._disable_cuff()
+    if zo.initial_position():
+        # Launches a second process to disable the original zero-g:
+        zo.disable_orig_zerog = zo._disable_cuff()
 
-    # Starts the controller
-    zo._start_controller()
+        # Starts the controller
+        zo._start_controller()
