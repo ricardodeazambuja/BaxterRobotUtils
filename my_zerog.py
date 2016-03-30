@@ -82,6 +82,7 @@ class ZeroG(object):
 
         self._cuff_state = False
         self._dash_state = False
+        self._dash_value = False
         self._circle_state = False
 
         self._gripper = baxter_interface.Gripper('%s' % (limb_name,), CHECK_VERSION)
@@ -175,14 +176,15 @@ class ZeroG(object):
         self._cuff_state = value
 
     def _dash_cb(self, value):
-        if value:
+        self._dash_value = value
+        if self._dash_value:
             if self._dash_state:
                 self._dash_state = False
             else:
                 self._dash_state = True
 
     def _circle_cb(self, value):
-        if value:
+        if value and not self._dash_value:
             if self._circle_state:
                 self._gripper.open()
                 self._circle_state=False
