@@ -45,7 +45,7 @@ class ZeroG(object):
     def __init__(self, limb_name='left', PID_gains=PID_gains_example, rate=1000.0,
                  stiff_joints=stiff_joints_example):
 
-        rospy.loginfo("Initializing node... ")
+        rospy.loginfo("Initializing ZeroG node... ")
         rospy.init_node("ZeroG")
 
         self._stiff_joints = stiff_joints # {'joint_name':angle,...}
@@ -108,7 +108,7 @@ class ZeroG(object):
              queue_size=10)
         self._pub_rate.publish(self._control_rate)
 
-        print "Initialization completed!"
+        print "ZeroG initialization completed!"
 
         rospy.on_shutdown(self.clean_shutdown)
 
@@ -154,7 +154,6 @@ class ZeroG(object):
             self._update_command()
             control_rate.sleep()
 
-        self.clean_shutdown()
         print "The end!"
 
     def _update_command(self):
@@ -176,7 +175,11 @@ class ZeroG(object):
         self._cuff_state = value
 
     def _dash_cb(self, value):
-        self._dash_state = value
+        if value:
+            if self._dash_state:
+                self._dash_state = False
+            else:
+                self._dash_state = True
 
     def _circle_cb(self, value):
         if value:
@@ -196,13 +199,14 @@ class ZeroG(object):
         return dict(zip(joint_names, error))
 
     def initial_position(self):
-        print "Hold Baxter's cuff sensors to SET THE INITIAL POSITION."
+        print "Hold Baxter's cuff sensors to SET THE APPROXIMATED INITIAL POSITION."
         print "Press the dash button when finished."
         # Waits until ctrl+c or someone holds the cuff
         while not rospy.is_shutdown():
             if not self.robot_is_enabled():
                 return False
             if self._dash_state:
+                self._dash_state = False
                 break
             rospy.sleep(.1)
 
