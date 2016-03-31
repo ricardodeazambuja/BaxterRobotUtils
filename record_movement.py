@@ -15,7 +15,6 @@ Pressing both buttons will start / stop the recording.
 /robot/digital_io/left_lower_button/state
 /robot/digital_io/left_upper_button/state
 
-
 '''
 import rospy
 
@@ -32,7 +31,10 @@ class read_from_ros(object):
 
         self.base_filename = base_filename
 
+        self.joint_names = joint_names
+
         self.joints = dict(zip(joint_names,[0]*len(joint_names)))
+
         self.joints_save = []
 
         self.endpoint_save = []
@@ -106,11 +108,11 @@ class read_from_ros(object):
     def _on_joint_states(self,msg):
 
         for idx, key in enumerate(msg.name):
-            if key in self.joints.keys():
+            if key in self.joint_names:
                 self.joints[key]=msg.position[idx]
 
         if self.record:
-            self.joints_save.append(self.joints.values())
+            self.joints_save.append([self.joints[idx] for idx in self.joint_names])
 
     def _on_endpoint_states(self,msg):
         if self.record:
