@@ -83,3 +83,6 @@ class ik_service(object):
 
     def ik_move(self):
         self.arm.set_joint_positions(self.limb_joints)
+        
+    def ik_move_to(self, timeout=15.0):
+        self.arm.move_to_joint_positions(self.limb_joints, timeout)
