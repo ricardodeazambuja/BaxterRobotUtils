@@ -38,7 +38,14 @@ class ik_service(object):
         self.arm.set_joint_position_speed(speed)
 
 
-    def ik_call(self, xyz, quat):
+    def ik_call(self, xyz, quat, seed_angles = None):
+        '''
+        xyz: list with  cartesian position
+        quat: list with quaternion (the robust equivalent of roll, pitch and yaw)
+        
+        Optional:
+        seed_angles: list with all seven joint angles to start the IK algorithm
+        '''
         self.ikreq = SolvePositionIKRequest()
         hdr = Header(stamp=rospy.Time.now(), frame_id='base')
         pose = PoseStamped(
@@ -57,7 +64,10 @@ class ik_service(object):
                     ),
                 ),
             )
-        self.ikreq.pose_stamp.append(pose)
+        if seed_angles:
+            self.ikreq.pose_stamp.append(pose,seed_angles=seed_angles)
+        else:
+            self.ikreq.pose_stamp.append(pose)
 
         try:
             rospy.wait_for_service(self.ns, 5.0) # blocks until a service is available
