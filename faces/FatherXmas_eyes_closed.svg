@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Creator: CorelDRAW X5 -->
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="3.41333in" height="2in" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 3413 2000"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .str0 {stroke:black;stroke-width:6.94488}
+    .str2 {stroke:black;stroke-width:26.6654}
+    .str1 {stroke:black;stroke-width:33.3346}
+    .fil4 {fill:none}
+    .fil5 {fill:black}
+    .fil1 {fill:#E8B754}
+    .fil0 {fill:#FFCC99}
+    .fil3 {fill:white}
+    .fil2 {fill:white;fill-rule:nonzero}
+   ]]>
+  </style>
+ </defs>
+ <g id="Layer_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <rect class="fil0" width="3413" height="2000"/>
+  <ellipse class="fil1 str0" cx="1600" cy="973" rx="257" ry="263"/>
+  <path class="fil2 str0" d="M301 1460c-536,-116 -134,-309 268,-270 0,-116 669,-155 937,-39 0,-155 803,-155 803,0 402,-116 1071,39 803,155 402,39 268,232 0,232 402,39 268,232 0,232 268,116 -402,270 -803,116 -134,155 -937,155 -937,0 -268,116 -803,77 -669,-39 -402,39 -669,-116 -402,-193 -268,0 -402,-193 0,-193z"/>
+  <path class="fil3 str0" d="M1590 1045l-19 -12c-149,-92 -276,-212 -448,-169 -171,43 -439,243 -526,161 -87,-82 -282,-137 -319,-158 -1,-1 131,318 140,336l37 71c138,266 289,248 524,249 257,1 501,-194 604,-416 15,-32 23,-51 7,-62z"/>
+  <path class="fil3 str0" d="M1605 1046l19 -12c149,-92 276,-212 448,-169 171,43 439,243 526,161 87,-82 282,-137 319,-158 1,-1 -131,318 -140,336l-37 71c-138,266 -289,248 -524,249 -257,1 -501,-194 -604,-416 -15,-32 -23,-51 -7,-62z"/>
+  <ellipse class="fil4 str1" cx="1024" cy="676" rx="325" ry="298"/>
+  <ellipse class="fil4 str1" cx="2318" cy="723" rx="325" ry="298"/>
+  <path class="fil4 str2" d="M1357 697c75,-65 208,-164 313,-164 139,0 169,43 257,131 25,25 23,33 60,49"/>
+  <line class="fil4 str2" x1="700" y1="667" x2="10" y2= "430" />
+  <line class="fil4 str2" x1="2645" y1="691" x2="3403" y2= "430" />
+  <rect class="fil5 str0" x="916" y="724" width="270" height="63"/>
+  <rect class="fil5 str0" x="2178" y="757" width="270" height="63"/>
+ </g>
+</svg>
