@@ -88,17 +88,31 @@ class read_from_ros(object):
         state_changed = False
 
         print "Movement Recorder initialization completed!"
-        print "Press Baxter's dash and circle buttons to start and stop recording..."
+        print "Press Baxter's circle button to start and stop recording..."
+
+        # while not rospy.is_shutdown():
+        #     if self.dash_state and self.circle_state and (not self.record):
+        #         self.record = True
+        #         print "Recording started!"
+        #
+        #     if (not self.dash_state) and (not self.circle_state) and self.record:
+        #         state_changed = True
+        #
+        #     if self.dash_state and self.circle_state and state_changed:
+        #         print "Recording finished!"
+        #         return
+        #
+        #     rospy.sleep(.1)
 
         while not rospy.is_shutdown():
-            if self.dash_state and self.circle_state and (not self.record):
+            if self.circle_state and (not self.record):
                 self.record = True
                 print "Recording started!"
 
-            if (not self.dash_state) and (not self.circle_state) and self.record:
+            if (not self.circle_state) and self.record:
                 state_changed = True
 
-            if self.dash_state and self.circle_state and state_changed:
+            if self.circle_state and state_changed:
                 print "Recording finished!"
                 return
 
@@ -125,11 +139,13 @@ class read_from_ros(object):
         self.dash_state = msg.state
 
     def clean_shutdown(self):
-        print "Saving files..."
-        numpy.save(self.base_filename+'_joints',self.joints_save)
-        print self.base_filename+'_joints'+'.npy', "...saved!"
-        numpy.save(self.base_filename+'_endpoints',self.endpoint_save)
-        print self.base_filename+'_endpoints'+'.npy', "...saved!"
+
+        if self.record:
+            print "Saving files..."
+            numpy.save(self.base_filename+'_joints',self.joints_save)
+            print self.base_filename+'_joints'+'.npy', "...saved!"
+            numpy.save(self.base_filename+'_endpoints',self.endpoint_save)
+            print self.base_filename+'_endpoints'+'.npy', "...saved!"
 
         print "The end!"
 
